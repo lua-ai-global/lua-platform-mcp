@@ -1,0 +1,48 @@
+{
+  "name": "lua-platform-mcp",
+  "version": "1.0.0",
+  "description": "Read-only MCP server for the Lua AI platform (heylua.ai) — list agents, read primitive versions, view deployment status, tail logs.",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "lua-platform-mcp": "./dist/server.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "node scripts/bundle.mjs",
+    "start": "node dist/server.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "model-context-protocol", "lua", "lua-cli", "heylua", "ai-agents", "cline", "cursor"],
+  "author": "Lua AI <support@heylua.ai>",
+  "license": "MIT",
+  "homepage": "https://github.com/lua-ai-global/lua-platform-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lua-ai-global/lua-platform-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lua-ai-global/lua-platform-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "~0.6.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "jest": "^29.7.0",
+    "typescript": "^5.3.0"
+  }
+}
