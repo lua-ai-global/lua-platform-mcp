@@ -54,7 +54,7 @@ npx lua-platform-mcp   # one-shot
 
 ## Authentication
 
-The server reads your Lua API key in this order:
+The server reads your scoped Lua API key in this order:
 
 1. `LUA_API_KEY` environment variable
 2. `~/.lua-cli/credentials` (written by `lua auth configure`)
@@ -66,6 +66,8 @@ Get a key from [admin.heylua.ai](https://admin.heylua.ai) (sign up + create an a
 npm install -g lua-cli
 lua auth configure
 ```
+
+The email + OTP flow creates a personal 90-day developer key bound to the selected workspace and agents. For a narrower read-only MCP key, create a custom or read-only key under **Settings → API Keys**. Legacy unscoped keys should be replaced before their migration cutoff.
 
 ## Verify it works
 
