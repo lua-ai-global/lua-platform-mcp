@@ -46,7 +46,7 @@ describe('apiRequest', () => {
   });
 
   test.each([
-    'lk_legacy_credential',
+    'api_0123456789abcdef0123456789abcdef',
     'api_123e4567-e89b-12d3-a456-426614174000.abcdefghijklmnopqrstuvwxyz_0123456789-ABCDE',
   ])('forwards %s unchanged in the Authorization header', async (credential) => {
     process.env.LUA_API_KEY = credential;

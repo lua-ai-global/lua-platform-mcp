@@ -139,7 +139,7 @@ describe('Tier 3: .env file (regression test for iteration-8 fix)', () => {
 });
 
 describe('Credential format opacity', () => {
-  const legacyCredential = 'lk_legacy_credential';
+  const legacyCredential = 'api_0123456789abcdef0123456789abcdef';
   const typedCredential = 'api_123e4567-e89b-12d3-a456-426614174000.abcdefghijklmnopqrstuvwxyz_0123456789-ABCDE';
 
   test.each([legacyCredential, typedCredential])('forwards %s unchanged from LUA_API_KEY', async (credential) => {

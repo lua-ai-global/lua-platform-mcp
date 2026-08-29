@@ -25,21 +25,18 @@ This file gives Cline (or any AI agent installing this MCP server on a user's be
 3. Register the server in the MCP config file. For Cline that's `cline_mcp_settings.json` (location varies — typically `~/Library/Application Support/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` on macOS or analogous paths on other OSes). Add or merge:
    ```json
    {
-     "mcpServers": {
-       "lua-platform": {
-         "command": "node",
-         "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"],
-         "env": {
-           "LUA_API_KEY": "${env:LUA_API_KEY}"
-         }
-       }
+    "mcpServers": {
+      "lua-platform": {
+        "command": "node",
+        "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"]
+      }
      }
    }
    ```
    Use the absolute path — relative paths are unreliable across MCP client implementations.
 
 4. Keep credentials on the user's machine. Do **not** ask the user to paste a secret into this conversation or any MCP request. Tell them to choose one local setup path:
-   - Run `lua auth configure` after installing `lua-cli`; it writes `~/.lua-cli/credentials`.
+   - Run `lua auth configure` after installing `lua-cli`; it writes `~/.lua-cli/credentials` and is the copy-paste-safe default for Cline.
    - Set `LUA_API_KEY` in the MCP host's local environment.
    - Add `LUA_API_KEY` to a local `.env` file in the MCP working directory.
 
