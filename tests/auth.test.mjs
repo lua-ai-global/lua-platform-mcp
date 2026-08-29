@@ -138,6 +138,40 @@ describe('Tier 3: .env file (regression test for iteration-8 fix)', () => {
   });
 });
 
+describe('Credential format opacity', () => {
+  const legacyCredential = 'lk_legacy_credential';
+  const typedCredential = 'api_123e4567-e89b-12d3-a456-426614174000.abcdefghijklmnopqrstuvwxyz_0123456789-ABCDE';
+
+  test.each([legacyCredential, typedCredential])('forwards %s unchanged from LUA_API_KEY', async (credential) => {
+    await expect(resolveApiKey({
+      env: { LUA_API_KEY: credential },
+      credentialsPath: join(tmpDir, 'nonexistent'),
+      cwd: tmpDir,
+    })).resolves.toBe(credential);
+  });
+
+  test.each([legacyCredential, typedCredential])(
+    'forwards %s unchanged from the lua-cli credentials file',
+    async (credential) => {
+      writeFileSync(join(tmpDir, 'credentials'), `${credential}\n`);
+      await expect(resolveApiKey({
+        env: {},
+        credentialsPath: join(tmpDir, 'credentials'),
+        cwd: tmpDir,
+      })).resolves.toBe(credential);
+    },
+  );
+
+  test.each([legacyCredential, typedCredential])('forwards %s unchanged from the working-directory .env', async (credential) => {
+    writeFileSync(join(tmpDir, '.env'), `LUA_API_KEY=${credential}\n`);
+    await expect(resolveApiKey({
+      env: {},
+      credentialsPath: join(tmpDir, 'nonexistent'),
+      cwd: tmpDir,
+    })).resolves.toBe(credential);
+  });
+});
+
 describe('No source resolves', () => {
   test('throws MCP_AUTH_STALE with all three sources mentioned', async () => {
     await expect(resolveApiKey({
