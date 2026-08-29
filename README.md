@@ -25,10 +25,7 @@ After cloning + building, register the server in your client's MCP config. For C
   "mcpServers": {
     "lua-platform": {
       "command": "node",
-      "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"],
-      "env": {
-        "LUA_API_KEY": "lk_..."
-      }
+      "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"]
     }
   }
 }
@@ -60,12 +57,16 @@ The server reads your Lua API key in this order:
 2. `~/.lua-cli/credentials` (written by `lua auth configure`)
 3. `.env` file in CWD
 
-Get a key from [admin.heylua.ai](https://admin.heylua.ai) (sign up + create an agent → Settings → API Keys), or use the Lua CLI:
+Credentials are opaque to this MCP server: it selects the first available source and forwards the value unchanged. Never paste a credential into an MCP request or a model conversation. Configure it locally with the Lua CLI, your shell environment, or a local `.env` file instead.
+
+For the copy-paste-safe local setup, use the Lua CLI before starting your MCP client:
 
 ```bash
 npm install -g lua-cli
 lua auth configure
 ```
+
+That writes `~/.lua-cli/credentials`, which the server reads automatically. Alternatively, create a credential in [admin.heylua.ai](https://admin.heylua.ai) and set its real value in the MCP host's local environment.
 
 ## Verify it works
 

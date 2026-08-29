@@ -25,24 +25,22 @@ This file gives Cline (or any AI agent installing this MCP server on a user's be
 3. Register the server in the MCP config file. For Cline that's `cline_mcp_settings.json` (location varies — typically `~/Library/Application Support/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` on macOS or analogous paths on other OSes). Add or merge:
    ```json
    {
-     "mcpServers": {
-       "lua-platform": {
-         "command": "node",
-         "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"],
-         "env": {
-           "LUA_API_KEY": "${env:LUA_API_KEY}"
-         }
-       }
+    "mcpServers": {
+      "lua-platform": {
+        "command": "node",
+        "args": ["/absolute/path/to/lua-platform-mcp/dist/server.js"]
+      }
      }
    }
    ```
    Use the absolute path — relative paths are unreliable across MCP client implementations.
 
-4. Ask the user to obtain a Lua API key:
-   - Visit https://admin.heylua.ai
-   - Sign up (free) and create an agent
-   - Settings → API Keys → copy the key (`lk_...`)
-   - Set it as an environment variable: `export LUA_API_KEY=lk_...` (or place in `~/.lua-cli/credentials`)
+4. Keep credentials on the user's machine. Do **not** ask the user to paste a secret into this conversation or any MCP request. Tell them to choose one local setup path:
+   - Run `lua auth configure` after installing `lua-cli`; it writes `~/.lua-cli/credentials` and is the copy-paste-safe default for Cline.
+   - Set `LUA_API_KEY` in the MCP host's local environment.
+   - Add `LUA_API_KEY` to a local `.env` file in the MCP working directory.
+
+   The server selects sources in that order and forwards either legacy or dotted typed credentials unchanged. If the user needs to create or manage a credential, direct them to https://admin.heylua.ai rather than asking for the secret.
 
 5. Restart Cline. Verify by asking: *"What lua-platform MCP tools are available?"* — expect 5 tools: `list_agents`, `get_agent`, `list_primitive_versions`, `get_deployment_status`, `tail_logs`.
 
@@ -54,7 +52,7 @@ Run from a Cline conversation:
 
 ## Troubleshooting
 
-- **Server fails to start**: usually missing `LUA_API_KEY`. Set the env var or write `~/.lua-cli/credentials`.
+- **Server fails to start**: usually no local credential source is configured. Set `LUA_API_KEY`, run `lua auth configure`, or add a local `.env` file.
 - **`list_agents` returns empty**: the API key is valid but the user has no agents yet — direct them to admin.heylua.ai to create one.
 - **HTTP 401 errors**: the key is invalid or expired. Regenerate at admin.heylua.ai.
 

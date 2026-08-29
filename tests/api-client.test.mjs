@@ -45,6 +45,16 @@ describe('apiRequest', () => {
     expect(fetchFn.calls[0].init.headers.Authorization).toBe('Bearer lk_test_key');
   });
 
+  test.each([
+    'api_0123456789abcdef0123456789abcdef',
+    'api_123e4567-e89b-12d3-a456-426614174000.abcdefghijklmnopqrstuvwxyz_0123456789-ABCDE',
+  ])('forwards %s unchanged in the Authorization header', async (credential) => {
+    process.env.LUA_API_KEY = credential;
+    const fetchFn = mockFetch(jsonResponse({ ok: true }));
+    await apiRequest('/agents', { fetchFn });
+    expect(fetchFn.calls[0].init.headers.Authorization).toBe(`Bearer ${credential}`);
+  });
+
   test('sets Content-Type: application/json', async () => {
     const fetchFn = mockFetch(jsonResponse({ ok: true }));
     await apiRequest('/agents', { fetchFn });
