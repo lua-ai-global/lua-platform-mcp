@@ -4,7 +4,57 @@
 // 401 / 403 / generic-error paths, and query-string handling.
 
 import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import { apiRequest } from '../src/api-client.mjs';
+
+const SOURCE_DIRECTORY = fileURLToPath(new URL('../src/', import.meta.url));
+const MCP_PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+function sourceFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? sourceFiles(path) : [path];
+  });
+}
+
+const NETWORK_MODULES = new Set([
+  'axios',
+  'got',
+  'ky',
+  'node-fetch',
+  'node:http',
+  'node:https',
+  'undici',
+]);
+
+function directTransportEvidence(path) {
+  const source = readFileSync(path, 'utf8');
+  const file = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const evidence = [];
+
+  function visit(node) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (NETWORK_MODULES.has(node.moduleSpecifier.text)) {
+        evidence.push(`import:${node.moduleSpecifier.text}`);
+      }
+    }
+    if (ts.isCallExpression(node)) {
+      if (ts.isIdentifier(node.expression) && ['fetch', 'fetchFn'].includes(node.expression.text)) {
+        evidence.push(`call:${node.expression.text}`);
+      }
+      if (ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'fetch') {
+        evidence.push(`call:${node.expression.getText(file)}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(file);
+  return evidence;
+}
 
 function mockFetch(scripted) {
   const calls = [];
@@ -59,6 +109,26 @@ describe('apiRequest', () => {
     const fetchFn = mockFetch(jsonResponse({ ok: true }));
     await apiRequest('/agents', { fetchFn });
     expect(fetchFn.calls[0].init.headers['Content-Type']).toBe('application/json');
+  });
+
+  test('identifies direct requests as the versioned platform MCP client', async () => {
+    const fetchFn = mockFetch(jsonResponse({ ok: true }));
+    await apiRequest('/agents', { fetchFn });
+    expect(fetchFn.calls[0].init.headers).toEqual({
+      'Authorization': 'Bearer lk_test_key',
+      'Content-Type': 'application/json',
+      'X-Lua-Client': `platform-mcp/${MCP_PACKAGE.version}`,
+    });
+  });
+
+  test('keeps every direct Lua API call behind the identified wrapper', () => {
+    const directCallers = sourceFiles(SOURCE_DIRECTORY)
+      .filter((path) => path.endsWith('.mjs'))
+      .filter((path) => directTransportEvidence(path).length > 0)
+      .map((path) => relative(SOURCE_DIRECTORY, path))
+      .sort();
+
+    expect(directCallers).toEqual(['api-client.mjs']);
   });
 
   test('uses LUA_API_URL env override when set', async () => {
