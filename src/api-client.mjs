@@ -6,9 +6,14 @@
 // against packages/lua-api source by the M4 contract tests.
 
 import { resolveApiKey } from './auth.mjs';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { version: PACKAGE_VERSION } = require('../package.json');
 
 const DEFAULT_BASE_URL = 'https://api.heylua.ai';
 const DEFAULT_TIMEOUT_MS = 10_000;
+const CLIENT_IDENTITY = `platform-mcp/${PACKAGE_VERSION}`;
 
 /**
  * @param {string} path - API path (with leading slash)
@@ -35,7 +40,7 @@ export async function apiRequest(path, {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'X-Lua-Client': 'platform-mcp/1.0.0',
+        'X-Lua-Client': CLIENT_IDENTITY,
       },
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
